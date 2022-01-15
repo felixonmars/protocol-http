@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Protocol::HTTP::Headers</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header> › <a class="link" href="../../../../index.html">Project</a> › <a class="link" href="../../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Protocol::HTTP::Headers</code></h1>
+	
+	<p>Headers are an array of key-value pairs. Some header keys represent multiple values.</p>
+	
+	
+	
+	<section>
+	<h2>Nested</h2>
+	
+	<ul>
+		<li><a href="Merged/index.html"><code class="language-ruby">Protocol::HTTP::Headers::Merged</code></a></li>
+	</ul>
+	</section>
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Protocol::HTTP::Headers.[]"><h3><code class="language-ruby">def self.[] headers</code></h3><p>Construct an instance from a headers Array or Hash. No-op if already an instance of <code>Headers</code>. If the underlying array is frozen, it will be duped.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.[] headers
+	if headers.nil?
+		return self.new
+	end
+	
+	if headers.is_a?(self)
+		if headers.frozen?
+			return headers.dup
+		else
+			return headers
+		end
+	end
+	
+	fields = headers.to_a
+	
+	if fields.frozen?
+		fields = fields.dup
+	end
+	
+	return self.new(fields)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#flatten!"><h3><code class="language-ruby">def flatten!</code></h3><p>Flatten trailer into the headers.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def flatten!
+	if @tail
+		self.delete(TRAILER)
+		@tail = nil
+	end
+	
+	return self
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#fields"><h3><code class="language-ruby">attr :fields</code></h3><p>An array of <code>[key, value]</code> pairs.</p>
+</section><section id="Protocol::HTTP::Headers#trailer?"><h3><code class="language-ruby">def trailer?</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def trailer?
+	@tail != nil
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#trailer!"><h3><code class="language-ruby">def trailer!(&amp;block)</code></h3><p>Record the current headers, and prepare to receive trailer.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def trailer!(&amp;block)
+	return nil unless self.include?(TRAILER)
+	
+	@tail ||= @fields.size
+	
+	return to_enum(:trailer!) unless block_given?
+	
+	if @tail
+		@fields.drop(@tail).each(&amp;block)
+	end
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#trailer"><h3><code class="language-ruby">def trailer(&amp;block)</code></h3><p>Enumerate all headers in the trailer, if there are any.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def trailer(&amp;block)
+	return to_enum(:trailer) unless block_given?
+	
+	if @tail
+		@fields.drop(@tail).each(&amp;block)
+	end
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#add"><h3><code class="language-ruby">def add(key, value)</code></h3><p>Add the specified header key value pair.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def add(key, value)
+	self[key] = value
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#set"><h3><code class="language-ruby">def set(key, value)</code></h3><p>Set the specified header key to the specified value, replacing any existing header keys with the same name.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def set(key, value)
+	# TODO This could be a bit more efficient:
+	self.delete(key)
+	self.add(key, value)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#[]="><h3><code class="language-ruby">def []= key, value</code></h3><p>Append the value to the given key. Some values can be appended multiple times, others can only be set once.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def []= key, value
+	if @indexed
+		merge_into(@indexed, key.downcase, value)
+	end
+	
+	@fields &lt;&lt; [key, value]
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#delete"><h3><code class="language-ruby">def delete(key)</code></h3><p>Delete all headers with the given key, and return the merged value.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def delete(key)
+	deleted, @fields = @fields.partition do |field|
+		field.first.downcase == key
+	end
+	
+	if deleted.empty?
+		return nil
+	end
+	
+	if @indexed
+		return @indexed.delete(key)
+	elsif policy = POLICY[key]
+		(key, value), *tail = deleted
+		merged = policy.new(value)
+		
+		tail.each{|k,v| merged &lt;&lt; v}
+		
+		return merged
+	else
+		key, value = deleted.last
+		return value
+	end
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Headers#to_h"><h3><code class="language-ruby">def to_h</code></h3><p>A hash table of <code>{key, policy[key].map(values)}</code></p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def to_h
+	@indexed ||= @fields.inject({}) do |hash, (key, value)|
+		merge_into(hash, key.downcase, value)
+		
+		hash
+	end
+end</code></pre>
+					</details></section>	</section>
+	
+	
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

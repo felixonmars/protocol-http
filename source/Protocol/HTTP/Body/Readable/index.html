@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Protocol::HTTP::Body::Readable</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header> › <a class="link" href="../../../../../index.html">Project</a> › <a class="link" href="../../../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Protocol::HTTP::Body::Readable</code></h1>
+	
+	<p>def finish -&gt; buffer the stream and close it.
+def close(error = nil) -&gt; close the stream immediately.
+end</p>
+	
+	
+	
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Protocol::HTTP::Body::Readable#close"><h3><code class="language-ruby">def close(error = nil)</code></h3><p>The consumer can call stop to signal that the stream output has terminated.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def close(error = nil)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#empty?"><h3><code class="language-ruby">def empty?</code></h3><p>Will read return any data?</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def empty?
+	false
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#ready?"><h3><code class="language-ruby">def ready?</code></h3><p>Whether calling read will block.
+We prefer pessimistic implementation, and thus default to <code>false</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def ready?
+	false
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#read"><h3><code class="language-ruby">def read</code></h3><p>Read the next available chunk.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def read
+	nil
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#stream?"><h3><code class="language-ruby">def stream?</code></h3><p>Should the internal mechanism prefer to use <a href="index.html#Protocol%3A%3AHTTP%3A%3ABody%3A%3AReadable%23call" title="call"><code class="language-ruby">Protocol::HTTP::Body::Readable#call</code></a>?</p>
+<details open>
+	<summary><h4>Signature</h4></summary>
+	<dl><dt>
+					<strong>returns</strong>　<code class="language-ruby">Boolean</code></dt></dl>
+</details>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def stream?
+	false
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#call"><h3><code class="language-ruby">def call(stream)</code></h3><p>Write the body to the given stream.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def call(stream)
+	while chunk = self.read
+		stream.write(chunk)
+	end
+ensure
+	stream.close($!)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#finish"><h3><code class="language-ruby">def finish</code></h3><p>Read all remaining chunks into a buffered body and close the underlying input.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def finish
+	# Internally, this invokes `self.each` which then invokes `self.close`.
+	Buffered.for(self)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#each"><h3><code class="language-ruby">def each</code></h3><p>Enumerate all chunks until finished, then invoke <code>#close</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def each
+	while chunk = self.read
+		yield chunk
+	end
+ensure
+	self.close($!)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Body::Readable#join"><h3><code class="language-ruby">def join</code></h3><p>Read all remaining chunks into a single binary string using <code>#each</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def join
+	buffer = String.new.force_encoding(Encoding::BINARY)
+	
+	self.each do |chunk|
+		buffer &lt;&lt; chunk
+		chunk.clear
+	end
+	
+	if buffer.empty?
+		return nil
+	else
+		return buffer
+	end
+end</code></pre>
+					</details></section>	</section>
+	
+	
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

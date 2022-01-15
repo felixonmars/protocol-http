@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Protocol::HTTP::URL</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header> › <a class="link" href="../../../../index.html">Project</a> › <a class="link" href="../../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Protocol::HTTP::URL</code></h1>
+	
+		
+	
+	
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Protocol::HTTP::URL.escape"><h3><code class="language-ruby">def self.escape(string, encoding = string.encoding)</code></h3><p>Escapes a string using percent encoding.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.escape(string, encoding = string.encoding)
+	string.b.gsub(/([^a-zA-Z0-9_.\-]+)/) do |m|
+		'%' + m.unpack('H2' * m.bytesize).join('%').upcase
+	end.force_encoding(encoding)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::URL.unescape"><h3><code class="language-ruby">def self.unescape(string, encoding = string.encoding)</code></h3><p>Unescapes a percent encoded string.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.unescape(string, encoding = string.encoding)
+	string.b.gsub(/%(\h\h)/) do |hex|
+		Integer(hex, 16).chr
+	end.force_encoding(encoding)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::URL::NON_PCHAR"><h3><code class="language-ruby">NON_PCHAR = /([^a-zA-Z0-9_\-\.~!$&amp;'()*+,;=:@\/]+)/.freeze</code></h3><p>According to https://tools.ietf.org/html/rfc3986#section-3.3, we escape non-pchar.</p>
+</section><section id="Protocol::HTTP::URL.escape_path"><h3><code class="language-ruby">def self.escape_path(path)</code></h3><p>Escapes non-path characters using percent encoding.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.escape_path(path)
+	encoding = path.encoding
+	path.b.gsub(NON_PCHAR) do |m|
+		'%' + m.unpack('H2' * m.bytesize).join('%').upcase
+	end.force_encoding(encoding)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::URL.encode"><h3><code class="language-ruby">def self.encode(value, prefix = nil)</code></h3><p>Encodes a hash or array into a query string.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.encode(value, prefix = nil)
+	case value
+	when Array
+		return value.map {|v|
+			self.encode(v, &quot;#{prefix}[]&quot;)
+		}.join(&quot;&amp;&quot;)
+	when Hash
+		return value.map {|k, v|
+			self.encode(v, prefix ? &quot;#{prefix}[#{escape(k.to_s)}]&quot; : escape(k.to_s))
+		}.reject(&amp;:empty?).join('&amp;')
+	when nil
+		return prefix
+	else
+		raise ArgumentError, &quot;value must be a Hash&quot; if prefix.nil?
+		
+		return &quot;#{prefix}=#{escape(value.to_s)}&quot;
+	end
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::URL.scan"><h3><code class="language-ruby">def self.scan(string)</code></h3><p>Scan a string for URL-encoded key/value pairs.</p>
+<details open>
+	<summary><h4>Signature</h4></summary>
+	<dl><dt>
+					<strong>yields</strong>　<code class="syntax language-ruby">{|key, value| ...}</code></dt><dd><dl>
+<dt>
+					<strong>parameter</strong>　<code class="syntax">key</code>　<code class="language-ruby">String</code></dt><dd><p>The unescaped key.</p>
+</dd><dt>
+					<strong>parameter</strong>　<code class="syntax">value</code>　<code class="language-ruby">String</code></dt><dd><p>The unescaped key.</p>
+</dd>					</dl></dd></dl>
+</details>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.scan(string)
+	string.split('&amp;') do |assignment|
+		key, value = assignment.split('=', 2)
+		
+		yield unescape(key), unescape(value)
+	end
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::URL.decode"><h3><code class="language-ruby">def self.decode(string, maximum = 8, symbolize_keys: false)</code></h3><p>TODO use native C extension from <code>Trenni::Reference</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.decode(string, maximum = 8, symbolize_keys: false)
+	parameters = {}
+	
+	self.scan(string) do |name, value|
+		keys = self.split(name)
+		
+		if keys.size &gt; maximum
+			raise ArgumentError, &quot;Key length exceeded limit!&quot;
+		end
+		
+		if symbolize_keys
+			keys.collect!{|key| key.empty? ? nil : key.to_sym}
+		end
+		
+		self.assign(keys, value, parameters)
+	end
+	
+	return parameters
+end</code></pre>
+					</details></section>	</section>
+	
+	
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

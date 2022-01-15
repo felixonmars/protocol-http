@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Protocol::HTTP::Reference</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header> › <a class="link" href="../../../../index.html">Project</a> › <a class="link" href="../../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Protocol::HTTP::Reference</code></h1>
+	
+	<p>A relative reference, excluding any authority. The path part of an HTTP request.</p>
+	
+	
+	
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Protocol::HTTP::Reference.parse"><h3><code class="language-ruby">def self.parse(path = '/', parameters = nil)</code></h3><p>Generate a reference from a path and user parameters. The path may contain a <code>#fragment</code> or <code>?query=parameters</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.parse(path = '/', parameters = nil)
+	base, fragment = path.split('#', 2)
+	path, query_string = base.split('?', 2)
+	
+	self.new(path, query_string, fragment, parameters)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Reference#path"><h3><code class="language-ruby">attr_accessor :path</code></h3><p>The path component, e.g. /foo/bar/index.html</p>
+</section><section id="Protocol::HTTP::Reference#query_string"><h3><code class="language-ruby">attr_accessor :query_string</code></h3><p>The un-parsed query string, e.g. 'x=10&amp;y=20'</p>
+</section><section id="Protocol::HTTP::Reference#fragment"><h3><code class="language-ruby">attr_accessor :fragment</code></h3><p>A fragment, the part after the '#'</p>
+</section><section id="Protocol::HTTP::Reference#parameters"><h3><code class="language-ruby">attr_accessor :parameters</code></h3><p>User supplied parameters that will be appended to the query part.</p>
+</section><section id="Protocol::HTTP::Reference#+"><h3><code class="language-ruby">def + other</code></h3><p>Merges two references as specified by RFC2396, similar to <code>URI.join</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def + other
+	other = self.class[other]
+	
+	self.class.new(
+		expand_path(self.path, other.path, true),
+		other.query_string,
+		other.fragment,
+		other.parameters,
+	)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Reference#base"><h3><code class="language-ruby">def base</code></h3><p>Just the base path, without any query string, parameters or fragment.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def base
+	self.class.new(@path, nil, nil, nil)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Reference#with"><h3><code class="language-ruby">def with(path: nil, parameters: nil, fragment: @fragment)</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def with(path: nil, parameters: nil, fragment: @fragment)
+	if @parameters
+		if parameters
+			parameters = @parameters.merge(parameters)
+		else
+			parameters = @parameters
+		end
+	end
+	
+	if path
+		path = expand_path(@path, path, false)
+	else
+		path = @path
+	end
+	
+	self.class.new(path, @query_string, fragment, parameters)
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Reference#dup"><h3><code class="language-ruby">def dup(path = nil, parameters = nil, merge_parameters = true)</code></h3><p>The arguments to this function are legacy, prefer to use <code>with</code>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def dup(path = nil, parameters = nil, merge_parameters = true)
+	if merge_parameters
+		with(path: path, parameters: parameters)
+	else
+		self.base.with(path: path, parameters: parameters)
+	end
+end</code></pre>
+					</details></section><section id="Protocol::HTTP::Reference#expand_path"><h3><code class="language-ruby">def expand_path(base, relative, pop = true)</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def expand_path(base, relative, pop = true)
+	if relative.start_with? '/'
+		return relative
+	else
+		path = split(base)
+		
+		# RFC2396 Section 5.2:
+		# 6) a) All but the last segment of the base URI's path component is
+		# copied to the buffer.  In other words, any characters after the
+		# last (right-most) slash character, if any, are excluded.
+		path.pop if pop or path.last == ''
+		
+		parts = split(relative)
+		
+		parts.each do |part|
+			if part == '..'
+				path.pop
+			elsif part == '.'
+				# Do nothing.
+			else
+				path &lt;&lt; part
+			end
+		end
+		
+		return path.join('/')
+	end
+end</code></pre>
+					</details></section>	</section>
+	
+	
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

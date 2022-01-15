@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Overview</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../_static/icon.png"/>
+		<link rel="stylesheet" href="../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../_components/jquery/jquery.min.js"></script>
+		<script src="../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header> › <a class="link" href="../index.html">Project</a> › <a class="link" href="index.html">Source</a></header>
+		
+		<main>
+			
+	<h1>Overview</h1>
+	
+	<ul class="index"><li>
+						<a href="Protocol/index.html"><code class="language-ruby">module Protocol</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/index.html"><code class="language-ruby">module HTTP</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/AcceptEncoding/index.html"><code class="language-ruby">class AcceptEncoding &lt; Middleware</code></a>
+						
+						
+						
+							<p>Set a valid accept-encoding header and decode the response.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/index.html"><code class="language-ruby">module Body</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/Body/Buffered/index.html"><code class="language-ruby">class Buffered &lt; Readable</code></a>
+						
+						
+						
+							<p>A body which buffers all it's contents.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Completable/index.html"><code class="language-ruby">class Completable &lt; Wrapper</code></a>
+						
+						
+						
+							<p>Invokes a callback once the body has completed, either successfully or due to an error.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/ZStream/index.html"><code class="language-ruby">class ZStream &lt; Wrapper</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Deflate/index.html"><code class="language-ruby">class Deflate &lt; ZStream</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Digestable/index.html"><code class="language-ruby">class Digestable &lt; Wrapper</code></a>
+						
+						
+						
+							<p>Invokes a callback once the body has finished reading.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/File/index.html"><code class="language-ruby">class File &lt; Readable</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Head/index.html"><code class="language-ruby">class Head &lt; Readable</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Inflate/index.html"><code class="language-ruby">class Inflate &lt; ZStream</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Readable/index.html"><code class="language-ruby">class Readable</code></a>
+						
+						
+						
+							<p>def finish -&gt; buffer the stream and close it.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Reader/index.html"><code class="language-ruby">module Reader</code></a>
+						
+						
+						
+							<p>General operations for interacting with a request or response body.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Rewindable/index.html"><code class="language-ruby">class Rewindable &lt; Wrapper</code></a>
+						
+						
+						
+							<p>A body which buffers all it's contents as it is <code>#read</code>.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Stream/index.html"><code class="language-ruby">class Stream</code></a>
+						
+						
+						
+							<p>The input stream is an IO-like object which contains the raw HTTP POST data. When applicable, its external encoding must be “ASCII-8BIT” and it must be opened in binary mode, for Ruby 1.9 compatibility. The input stream must respond to gets, each, read and rewind.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Body/Wrapper/index.html"><code class="language-ruby">class Wrapper &lt; Readable</code></a>
+						
+						
+						
+							<p>Wrapping body instance. Typically you'd override <code>#read</code>.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li></ul>				</li></ul>				</li><li>
+						<a href="Protocol/HTTP/ContentEncoding/index.html"><code class="language-ruby">class ContentEncoding &lt; Middleware</code></a>
+						
+						
+						
+							<p>Encode a response according the the request's acceptable encodings.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Cookie/index.html"><code class="language-ruby">class Cookie</code></a>
+						
+						
+						
+							<p>Represents an individual cookie key-value pair.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Error/index.html"><code class="language-ruby">class Error &lt; StandardError</code></a>
+						
+						
+						
+							<p>A generic, HTTP protocol error.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/index.html"><code class="language-ruby">module Header</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/Header/Authorization/index.html"><code class="language-ruby">class Authorization &lt; String</code></a>
+						
+						
+						
+							<p>Used for basic authorization.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/CacheControl/index.html"><code class="language-ruby">class CacheControl &lt; Split</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/Connection/index.html"><code class="language-ruby">class Connection &lt; Split</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/Cookie/index.html"><code class="language-ruby">class Cookie &lt; Multiple</code></a>
+						
+						
+						
+							<p>The Cookie HTTP request header contains stored HTTP cookies previously sent by the server with the Set-Cookie header.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/SetCookie/index.html"><code class="language-ruby">class SetCookie &lt; Cookie</code></a>
+						
+						
+						
+							<p>The Set-Cookie HTTP response header sends cookies from the server to the user agent.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/ETag/index.html"><code class="language-ruby">class ETag &lt; String</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/ETags/index.html"><code class="language-ruby">class ETags &lt; Split</code></a>
+						
+						
+						
+							<p>This implementation is not strictly correct according to the RFC-specified format.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/Multiple/index.html"><code class="language-ruby">class Multiple &lt; Array</code></a>
+						
+						
+						
+							<p>Header value which is split by newline charaters (e.g. cookies).</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/Split/index.html"><code class="language-ruby">class Split &lt; Array</code></a>
+						
+						
+						
+							<p>Header value which is split by commas.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Header/Vary/index.html"><code class="language-ruby">class Vary &lt; Split</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Headers/index.html"><code class="language-ruby">class Headers</code></a>
+						
+						
+						
+							<p>Headers are an array of key-value pairs. Some header keys represent multiple values.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+						<a href="Protocol/HTTP/Headers/Merged/index.html"><code class="language-ruby">class Merged</code></a>
+						
+						
+						
+							<p>Used for merging objects into a sequential list of headers. Normalizes header keys and values.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li></ul>				</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Methods/index.html"><code class="language-ruby">class Methods</code></a>
+						
+						
+						
+							<p>All supported HTTP methods</p>
+
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/Methods/each/index.html"><code class="language-ruby">self.each</code></a>
+						
+						
+						
+							<p>Use Methods.constants to get all constants.</p>
+
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/Methods/each/define_method/index.html"><code class="language-ruby">define_method(name.downcase)</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li></ul>				</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Middleware/index.html"><code class="language-ruby">class Middleware</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+						<a href="Protocol/HTTP/Middleware/NotFound/index.html"><code class="language-ruby">module NotFound</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Middleware/Builder/index.html"><code class="language-ruby">class Builder</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+					
+									</li><li>
+						<a href="Protocol/HTTP/Middleware/Okay/index.html"><code class="language-ruby">module Okay</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/Middleware/HelloWorld/index.html"><code class="language-ruby">module HelloWorld</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Reference/index.html"><code class="language-ruby">class Reference</code></a>
+						
+						
+						
+							<p>A relative reference, excluding any authority. The path part of an HTTP request.</p>
+
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Request/index.html"><code class="language-ruby">class Request</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+					
+									</li></ul>				</li><li>
+						<a href="Protocol/HTTP/Response/index.html"><code class="language-ruby">class Response</code></a>
+						
+						
+						
+					
+					<ul class="index"></ul>				</li><li>
+						<a href="Protocol/HTTP/URL/index.html"><code class="language-ruby">module URL</code></a>
+						
+						
+						
+					
+					<ul class="index"><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li><li>
+					
+									</li></ul>				</li></ul>				</li></ul>				</li></ul>
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>
