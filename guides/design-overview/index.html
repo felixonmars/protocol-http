@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Design Overview</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		<script src="../../_components/mermaid/mermaid.min.js"></script>
+		
+		<script src="../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+			
+			let isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+			let config = {theme: 'light'};
+			if (isDarkMode) config.theme = 'dark';
+			else config.theme = 'forest';
+			mermaid.initialize(config);
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header> › <a class="link" href="../../index.html">Project</a> › <a class="link" href="../index.html">Guides</a></header>
+		
+		<main>
+			
+	<h1>Design Overview</h1>
+	
+	<p>The interfaces provided by <a href="../../source/Protocol/HTTP/index.html" title="Protocol::HTTP"><code class="language-ruby">module Protocol::HTTP</code></a> underpin all downstream implementations. Therefore, we provide some justification for the design choices.</p>
+<section id="request/response-model"><h2>Request/Response Model</h2>
+<p>The main model we support is the request/response model. A client sends a request to a server which return response. The protocol is responsible for serializing the request and response objects.</p>
+<div class="mermaid">sequenceDiagram
+	participant CA as Application
+	participant Client
+	participant Server
+	participant SA as Application
+	CA-&gt;&gt;+Client: Request
+	Client-&gt;&gt;+Server: Request
+	Server-&gt;&gt;+SA: Request
+	SA-&gt;&gt;+Server: Response
+	Server-&gt;&gt;+Client: Response
+	Client-&gt;&gt;+CA: Response
+</div>
+<p>We provide an interface for request and response objects. This provides performance, predictability and robustness. This model has proven itself over several years, handling a variety of different use cases.</p>
+<pre><code class="language-ruby">class Request
+	attr :verb
+	attr :target
+	attr :headers
+	attr :body
+end
+
+class Response
+	attr :status
+	attr :headers
+	attr :body
+end
+</code></pre>
+<p>One other advantage is that it's symmetrical between clients and servers with a clear mapping, i.e. the protocol is responsible for transiting requests from the client to the server, and responses from the server back to the client. This helps us separate and define request/response interfaces independently from protocol implementation.</p>
+</section><section id="client-design"><h3>Client Design</h3>
+<p>A request/response model implies that you create a request and receive a response back. This maps to a normal function call where the request is the argument and the response is the returned value.</p>
+<pre><code class="language-ruby">request = Request.new(&quot;GET&quot;, url)
+response = client.call(request)
+
+response.headers
+response.read
+</code></pre>
+</section><section id="stream-model"><h2>Stream Model</h2>
+<p>An alternative model is the stream model. This model is more suitable for WebSockets and other persistent bi-directional channels.</p>
+<div class="mermaid">sequenceDiagram
+	participant CA as Application
+	participant Client
+	participant Server
+	participant SA as Application
+	CA-&gt;&gt;+Client: Stream
+	Client-&gt;&gt;+Server: Stream
+	Server-&gt;&gt;+SA: Stream
+</div>
+<p>The interfaces for streaming can be implemented a bit differently, since a response is not returned but rather assigned to the stream, and the streaming occurs in the same execution context as the client or server handling the request.</p>
+<pre><code class="language-ruby">class Stream
+	# Request details.
+	attr :verb
+	attr :target
+	attr :headers
+	
+	attr :response
+	
+	# Write the response and start streaming the output body.
+	def respond(status, headers)
+		response.status = status
+		response.headers = headers
+	end
+	
+	# Request body.
+	attr_accessor :input
+	
+	# Response body.
+	attr_accessor :output
+	
+	# Write to the response body.
+	def write(...)
+		@output.write(...)
+	end
+	
+	# Read from the request body.
+	def read
+		@input.read
+	end
+end
+
+class Response
+	def initialize(verb, target)
+		@input = Body::Writable.new
+		@output = Body::Writable.new
+	end
+	
+	attr_accessor :status
+	attr_accessor :headers
+	
+	# Prepare a stream for making a request.
+	def request(verb, target, headers)
+		# Create a request stream suitable for writing into the buffered response:
+		Stream.new(verb, target, headers, self, @input, @output)
+	end
+	
+	# Write to the request body.
+	def write(...)
+		@input.write(...)
+	end
+	
+	# Read from the response body.
+	def read
+		@output.read
+	end
+end
+</code></pre>
+</section><section id="client-design"><h3>Client Design</h3>
+<p>A stream model implies that you create a stream which contains both the request and response bodies. This maps to a normal function call where the argument is the stream and the returned value is ignored.</p>
+<pre><code class="language-ruby">response = Response.new
+stream = response.request(&quot;GET&quot;, url)
+
+client.call(stream)
+
+response.headers
+response.read
+</code></pre>
+</section><section id="differences"><h2>Differences</h2>
+<p>The request/response model has a symmetrical design which naturally uses the return value for the result of executing the request. The result encapsulates the behaviour of how to read the response status, headers and body. Because of that, streaming input and output becomes a function of the result object itself. As in:</p>
+<pre><code class="language-ruby">def call(request)
+	body = Body::Writable.new
+	
+	Fiber.schedule do
+		while chunk = request.input.read
+			body.write(chunk.reverse)
+		end
+	end
+	
+	return Response[200, headers, body]
+end
+
+input = Body::Writable.new
+response = call(... body ...)
+
+input.write(&quot;Hello World&quot;)
+input.close
+response.read -&gt; &quot;dlroW olleH&quot;
+</code></pre>
+<p>The streaming model does not have the same symmetry, and instead opts for a uni-directional flow of information.</p>
+<pre><code class="language-ruby">def call(stream)
+	stream.respond(200, headers)
+	
+	Fiber.schedule do
+		while chunk = stream.read
+			stream.write(chunk.reverse)
+		end
+	end
+end
+
+input = Body::Writable.new
+response = Response.new(...input...)
+call(response.stream)
+
+input.write(&quot;Hello World&quot;)
+input.close
+response.read -&gt; &quot;dlroW olleH&quot;
+</code></pre>
+<p>The value of this uni-directional flow is that it is natural for the stream to be taken out of the scope imposed by the nested <code>call(request)</code> model. However, the user must explicitly close the stream, since it's no longer scoped to the client and/or server.</p>
+</section>
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>
